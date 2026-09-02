@@ -12,9 +12,8 @@ def submit(url_var, file_label):
 	print('URL:', url_var.get())
 	print('File:', file_label.cget('text'))
 
-import tkinter as tk
 
-#
+
 # animate
 '''
 	canvas
@@ -23,9 +22,8 @@ import tkinter as tk
 	dx == delta x for ball position (speed)
 	dt == time transpired by this animation script
 '''
-
 def animate(canvas, ball, root, dx, dt):
-	if dt > global_variables.startup_length:
+	if dt > global_variables.startup_length-30:
 		return
 
 	canvas.move(ball, dx, 0)
@@ -34,48 +32,45 @@ def animate(canvas, ball, root, dx, dt):
 		dx = -dx
 	root.after(30, lambda: animate(canvas, ball, root,dx, dt+30))
 
+
+
+
 class Gui:
 	def __init__(self):
 		self.root = tk.Tk()
 
 
-	def finish(self, splash):
+	# finish
+	"""
+		finish a TK root and/or splashscreen
+		splash: the screen
+		splash_root: root 
+	"""
+	def finish(self, splash, splash_root):
 		splash.destroy()
+		splash_root.destroy()
+
+		# make root visible again
 		self.root.deiconify()
 
 
+
+	# startup
+	"""
+		startup script with visuals
+		point to script which runs this
+	"""
 	def startup(self):
-		# hide main window
-		self.root.withdraw()
-
-		# create splash root object
-		splash = tk.Toplevel(self.root)
-		splash.title("Loading...")
-		canvas = tk.Canvas(splash, width=400, height=200, bg=global_variables.colors["background"])
-		canvas.pack()
-
-		# create ball and animate
-		ball = canvas.create_oval(50, 80, 100, 130, fill="blue")
-		animate(canvas, ball, self.root, dx=5, dt=0)
-
-		# kill
-		splash.after(global_variables.startup_length, lambda: self.finish(splash))
+		import gui.startup_gui as startup
+		startup.startup(self.root, self.finish, animate)
 
 
 
-
-
+	# main page
+	"""
+		this is the page most operations will run through
+		point to script which runs this
+	"""
 	def main_page(self):
-		self.root.title(global_variables.program_name)
-
-		tk.Label(self.root, text='Enter URL:').grid(row=0, column=0, padx=5, pady=5, sticky='w')
-		url_var = tk.StringVar()
-		tk.Entry(self.root, textvariable=url_var, width=50).grid(row=0, column=1, padx=5, pady=5)
-
-		tk.Button(self.root, text='Choose File...', command=lambda: choose_file(file_label)).grid(row=1, column=0, padx=5, pady=5)
-		file_label = tk.Label(self.root, text='No file selected', anchor='w')
-		file_label.grid(row=1, column=1, padx=5, pady=5, sticky='w')
-
-		tk.Button(self.root, text='Submit', command=lambda: submit(url_var, file_label)).grid(row=2, column=0, columnspan=2, pady=10)
-
-		self.root.mainloop()
+		import gui.main_gui as main_gui
+		main_gui.main_page(choose_file, submit, self.root)
